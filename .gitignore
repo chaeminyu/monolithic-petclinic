@@ -18,3 +18,4 @@ target/
 _site/
 
 *.bak
+.DS_Store
