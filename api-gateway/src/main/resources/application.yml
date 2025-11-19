@@ -1,0 +1,45 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: api-gateway
+
+# 서비스 URL 설정
+services:
+  customer:
+    url: http://localhost:8081
+  monolith:
+    url: http://localhost:8080
+
+# Feature Toggle (MSA ↔ Monolith 전환)
+feature:
+  toggle:
+    use-customer-service: true  # true = Customer Service, false = Monolith
+
+# Circuit Breaker 설정 (장애 대응)
+resilience4j:
+  circuitbreaker:
+    instances:
+      customer-service:
+        register-health-indicator: true
+        sliding-window-size: 10 # 최근 10개 요청 모니터링
+        failure-rate-threshold: 50 # 실패율 50% 초과 시 차단
+        wait-duration-in-open-state: 10000 # 10초 후 재시도
+        permitted-number-of-calls-in-half-open-state: 3 # 테스트 요청 3개
+
+# 로깅
+logging:
+  level:
+    org.springframework.samples.petclinic.gateway: DEBUG
+    io.github.resilience4j: DEBUG
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
